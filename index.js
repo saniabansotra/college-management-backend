@@ -6,8 +6,8 @@ app.use(cookies());
 const verifyToken = require("./tokens/verifyToken");
 const generateToken = require("./tokens/generateToken");
 require("dotenv").config();
-const connectDatabase = require("./connection/db");
-const USER_MODEL = require("./models/User");
+const connectDatabase = require("./connection/connect");
+const USER_MODEL = require("./model/usermodel");
 const { encrytPassword, verifyPassword } = require("./functions/encryption");
 const { sendLoginOtp, verifyOtp } = require("./functions/otp");
 
@@ -103,24 +103,6 @@ app.post("/signup", async (req, res) => {
     return res.status(400).json({ success: false, error: error.message });
   }
 });
-// app.post("/login", (req, res) => {
-//   try {
-//     console.log(req.body);
-//     let userid = req.body.userid;
-//     if (req.body.password === "backendstorepassword") {
-//       const token = generateToken(userid);
-//       console.log(token);
-//       res.cookie("ashu_tk", token); // cookie set code
-//       return res.json({ success: true, message: "Cookie generate success" });
-//     } else {
-//       return res
-//         .status(400)
-//         .json({ success: false, error: "Incorrect credentials" });
-//     }
-//   } catch (error) {
-//     res.status(400).json({ success: false, error: error.message });
-//   }
-// });
 
 app.post("/login", async (req, res) => {
   try {
@@ -136,9 +118,7 @@ app.post("/login", async (req, res) => {
 
     if (await verifyPassword(inputpassword, originalpassword)) {
       sendLoginOtp(`+91${checkUser.phonenumber}`);
-      // here we will do 2fa processs which we will send otp to the logged in user
-      // const token = generateToken(checkUser._id);
-      // res.cookie("auth_tk", token);
+
       return res.json({ success: true, message: "Please enter OTP to login" });
     } else {
       return res
@@ -151,7 +131,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-//first factor
 app.post("/mfaverify", async (req, res) => {
   try {
     let email = req.body.useremail;
